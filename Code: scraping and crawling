@@ -1,0 +1,77 @@
+
+import requests
+page=requests.get('http"//quotes.toscrape.com/page/1')	#an object
+print(page)	#get <posponse [200]> 		#there can be 1/ no difference with 1
+
+
+print(page.text)	#using atttibutes text and url
+print(page.url)
+
+
+#parse html document and create atree object that stores information of how elements are organized
+import lxml.etree as ET
+tree=ET.HTML(page.text)
+print(tree)	#get a message where the tree is stored in the memory
+
+
+#select all div elements; use xpath
+divlist=tree.xpath('//div')	#return a list which is an object
+print(len(divlist))	#28
+
+
+#div elements whose @value is quote
+divlist2=tree.xpath('//div[@class="quote"]') #where class is a attribute
+print(len(divlist2))	#get 10
+
+
+spanlist=tree.xpath('//div[@class"quote"]/span[@class="text"]')	#under@class as quote find @class as text
+for span in spanlist:
+	print(span.text)	#10 lines of quotes
+
+
+hreflist=tree.xpath('//li[@class="next"]/a/@href')	#a list of all attribute values for this pattern
+print(hreflist)	#['/page/2/']
+next_url=hreflisy[0]
+print(next_url)	#a string /page/2/
+
+
+next_url=requests.compat.urljoia('http://quotes.toscrape.com/page/1/',next)url)	#naively typing /page/2/ wont get anything cuz its actually a part of a long url: 							#	http"//quotes/toscrapecom/page/2/ when we click the next buttom the browser automatically deos the work, 								#attachignthe prefix to /page/2/
+print(next_url)	#take the url of the current webpage and combine it with the short cut suing the function to get the full url for /page/2/
+
+
+page=requests.get(next_url)
+tree=ET.HTML(page.text)
+spans=tree.xpath('//div[@class="quote"]/span[@class="text']')
+for span in spans:
+	print(span.text)
+
+
+#scraping to crawling
+#click untill there is no next button in the page
+#(1) get the text from a URL
+#(2) scrape all the qutes from the text
+#(3) look for a next button
+#(4) if the button exists, click the next button and repear (1-3); otherwise, stop.
+#step (1-3) is in the program file 
+#save all quotes into a file
+
+import requests
+import lxml.etree as ET
+import scraping
+#else we can do: import scraping #not from a python module a py file on the desktop, which is in the same directory with this lab txt file.
+#if not in the same directory use:
+#import sys
+#sys.path.append('../Downloads/')	#better if absolute path('c:\Users\*)
+#import scraping (the file)
+
+url='http://quotes.toscrape.com/page/1/'
+stop=False
+f=open('quotes.txt','wb')
+while not stop:
+	quotes,url=scraping.process(url)
+	for quote in quotes:
+		quote=quote+'\n'			#string with nonascii symbols+'\n'(in the python), string not ascii because the qutation mark is special,eg this is a uicode object
+		quote_unicode=quote.encode()	#making it the binary, writable object
+		f.write(quote_unicode)
+	if url is None: stop=True
+f.close()						# f.txt at the same directory
